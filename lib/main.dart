@@ -14,66 +14,81 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: Scaffold(
-        body: Demo1InheritedWidget(
-          child: Ongba(
-            child: Chame(),
-          ),
+        body: CounterPage(
+          child: ChildWidget(),
         ),
       ),
     );
   }
 }
 
-class Demo1InheritedWidget extends InheritedWidget{
-  Widget child;
-  int count = 10;
-
-  Demo1InheritedWidget({required this.child}) : super(child : child);
-
-  static Demo1InheritedWidget? off(BuildContext context){
-    Demo1InheritedWidget? demo1inheritedWidget = context.dependOnInheritedWidgetOfExactType();
-    return demo1inheritedWidget;
-  }
-
-  @override
-  bool updateShouldNotify(covariant InheritedWidget oldWidget) {
-   return false;
-  }
-
-}
-
-class Ongba extends StatefulWidget {
+class CounterPage extends StatefulWidget {
 
   Widget child;
 
-  Ongba({required this.child});
+  CounterPage({required this.child});
 
   @override
-  _OngbaState createState() => _OngbaState();
+  _CounterPageState createState() => _CounterPageState();
 }
 
-class _OngbaState extends State<Ongba> {
-  @override
-  Widget build(BuildContext context) {
-    return widget.child;
+// state object
+class _CounterPageState extends State<CounterPage> {
+  int count = 0;
+
+  void setCount(){
+    setState(() {
+      count += 1;
+
+    });
   }
-}
-
-
-class Chame extends StatefulWidget {
-
-  @override
-  _ChameState createState() => _ChameState();
-}
-
-class _ChameState extends State<Chame> {
   @override
   Widget build(BuildContext context) {
-    Demo1InheritedWidget? demo1 = Demo1InheritedWidget.off(context);
     return Container(
       child: Center(
-        child: Text( demo1 == null ? "null" : demo1.count.toString()),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Demo2InheritedWidget(child: widget.child, state: this),
+            ElevatedButton(
+                onPressed: (){
+                  setCount();
+                },
+                child: Text("Increment"))
+          ],
+        ),
       ),
     );
   }
 }
+
+class Demo2InheritedWidget extends InheritedWidget{
+
+  Widget child;
+  _CounterPageState state;
+
+  Demo2InheritedWidget({required this.child , required this.state}) : super(child : child);
+
+  static Demo2InheritedWidget? of(BuildContext context){
+    Demo2InheritedWidget? demo2 = context.dependOnInheritedWidgetOfExactType();
+    return demo2;
+  }
+
+  @override
+  bool updateShouldNotify(covariant InheritedWidget oldWidget) {
+    return true;
+  }
+}
+
+class ChildWidget extends StatelessWidget {
+
+  @override
+  Widget build(BuildContext context) {
+    Demo2InheritedWidget? demo2inheritedWidget = Demo2InheritedWidget.of(context);
+    return Container(
+      child: Text(
+          demo2inheritedWidget != null ? demo2inheritedWidget.state.count.toString() : "null"),
+    );
+  }
+}
+
